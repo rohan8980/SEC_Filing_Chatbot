@@ -159,8 +159,6 @@ if 'is_configured' not in st.session_state:
     st.session_state.is_configured = False
 if 'data_fetched' not in st.session_state:
     st.session_state.data_fetched = False
-if 'sections' not in st.session_state:
-    st.session_state.sections = edgarapi.get_sections_10K()
 
 # UI Components
 st.title("SEC Filing (10-K) Q&A")
@@ -169,13 +167,7 @@ st.title("SEC Filing (10-K) Q&A")
 st.sidebar.title("Configurations")
 llm_provider = st.sidebar.selectbox("Select LLM Company", ["Groq", "OpenAI",])
 openai_api_key = st.sidebar.text_input("OpenAI [API Key](https://platform.openai.com/api-keys) - Embeddings", type="password")
-sec_api_key = st.sidebar.text_input("SEC Edgar Filings [API Key](https://sec-api.io/)", type="password")
-
-st.sidebar.header("Select Sections to Include")
-selected_sections = {}
-for key, value in st.session_state.sections.items():
-    if st.sidebar.checkbox(f"{key}: {value}", value=True):
-        selected_sections[key] = value
+sec_api_key = st.sidebar.text_input("SEC Filings - Edgar [API Key](https://sec-api.io/)", type="password")
 
 # Configure Button to process and initialize everything
 if st.sidebar.button("Configure"):
@@ -210,7 +202,8 @@ if st.sidebar.button("Configure"):
             st.session_state.query=""
         if 'last_n_chats' not in st.session_state:
             st.session_state.last_n_chats = 10
-        st.session_state.sections = selected_sections
+        if 'sections' not in st.session_state:
+            st.session_state.sections = edgarapi.get_sections_10K()
 
         st.session_state.is_configured = True
     
@@ -228,6 +221,7 @@ if st.session_state.is_configured:
         filings = edgarapi.get_recent_filings_10K(cik=cik, headers=headers, count=5) # Limit max to 5 years filings
 
         # Checkbox for 10k filings based on filing dates
+        st.write("###### Select filings")
         selected_filings = []
         cols_per_row = 5
         num_filings = len(filings)
@@ -240,14 +234,30 @@ if st.session_state.is_configured:
                         if st.checkbox(filing['date']):
                             selected_filings.append(filing)
         # Checkbox for "Search Web"
-        col1, col2, col3 = st.columns([1, 1, 1])  # Adjust as needed for alignment
+        st.write('###### Search Web?')
+        col1, col2, col3 = st.columns([1, 1, 1])  
         with col1:
             search_web = st.checkbox("Search Web")
         filings = selected_filings
-        
+
+        # Checkbox for 10K Sections for a filing
+        st.write("###### Select Sections for filing")
+        cols_per_row = 2
+        selected_sections = {}
+        sections = list(st.session_state.sections.items())
+        num_sections = len(sections)
+        for i in range(0, num_sections, cols_per_row):
+            cols = st.columns(cols_per_row)
+            for j, col in enumerate(cols):
+                if i + j < num_sections:
+                    item_key, item_value = sections[i + j]
+                    with col:
+                        if st.checkbox(f"{item_key}: {item_value[:50]}", value=True):
+                            selected_sections[item_key] = item_value
 
         # Fetch Data Button to gather data and save it in Qdrant VectorStore
         if st.button("Fetch Data"):
+            st.session_state.sections = selected_sections
             with st.spinner('Extracting data from EDGAR API...'):
                 edgarapi.save_to_vectorstore(data=filings, vector_store=st.session_state.vector_store, type_of_data='filings', sections=st.session_state.sections, extractorApi=st.session_state.extractorApi)
                 # st.write("Selected filings have been processed and saved to the vector store.")
