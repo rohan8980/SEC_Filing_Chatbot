@@ -97,7 +97,7 @@ def initialize_vectorestore(session_id: str, qdrant_client: QdrantClient, embedd
     qdrant_client.create_collection(collection_name=session_id, vectors_config=VectorParams(size=1536, distance=Distance.COSINE),)
     return QdrantVectorStore(client=qdrant_client, collection_name=session_id, embedding=embeddings,)
 
-def save_to_vectorstore(data: list, vector_store: QdrantVectorStore, type_of_data: str='filings', items:dict=None, extractorApi: ExtractorApi=None):
+def save_to_vectorstore(data: list, vector_store: QdrantVectorStore, type_of_data: str='filings', sections:dict=None, extractorApi: ExtractorApi=None):
     """
     Saves data (list of text) into Qdrant vectorstore with metadata
     ExtractorApi fetches data for each section. 
@@ -105,7 +105,7 @@ def save_to_vectorstore(data: list, vector_store: QdrantVectorStore, type_of_dat
         data (list[str]): Data to be stored in vectorstore
         vector_store: Qdrant vector store
         type_of_data: ['filings', 'stock_info', 'news']
-        items: 10-k filing sections dictionary (type_of_data=='filings)
+        sections: 10-k filing sections dictionary (type_of_data=='filings)
         extractorApi: EDGAR API to get filings data (type_of_data=='filings)
     """
     if type_of_data == 'filings':
@@ -115,12 +115,12 @@ def save_to_vectorstore(data: list, vector_store: QdrantVectorStore, type_of_dat
             filing_date = filing['date']
             
             #Getting data for each section
-            for item in items:
-                # print("item:", item, "url", filing_url, "filing Date", filing_date, "desc", items[item])
+            for item in sections:
+                # print("item:", item, "url", filing_url, "filing Date", filing_date, "desc", sections[item])
                 try:
                     uuids = []
                     metadata_list = []
-                    section_desc = items[item]
+                    section_desc = sections[item]
                     
                     #Using extractorAPI to fetch data of each section from the form
                     section_text = extractorApi.get_section(filing_url=filing_url, section=item, return_type="text")
