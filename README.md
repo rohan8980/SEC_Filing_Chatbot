@@ -40,8 +40,8 @@ This project is a financial chatbot designed to help users query SEC filings, st
     GROQ_API_KEY="your_groq_api_key"
     QDRANT_URL="your_qdrant_url"
     QDRANT_API_KEY="your_qdrant_api_key"
-    NAME = "Rohan"
-    EMAIL = 'rohanpatel8980@gmail.com'
+    NAME = "your_name"
+    EMAIL = 'address@mail.com'
     ```
 
 4. **Running the Application**:
