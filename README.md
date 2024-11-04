@@ -11,15 +11,6 @@ This project is a financial chatbot designed to help users query SEC filings, st
 - **Streamlit UI**: A simple web interface to interact with the chatbot, manage session histories, and display stock and filing information.
 - **Multi-User Support**: Uses session IDs to separate and store data for different users.
 
-## Project Structure
-├── app.py # Main Streamlit application for the chatbot 
-├── fetchdata.py # Handles fetching SEC filings and initializing the vector store 
-├── llm.py # Language model (LLM) setup and RAG chain generation 
-├── scraper.py # Web scraping for stock prices and financial news 
-├── requirements.txt # Python dependencies 
-└── README.md # This readme file
-
-
 ## Setup
 
 ### Prerequisites
