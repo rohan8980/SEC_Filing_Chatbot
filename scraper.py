@@ -4,9 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-from contextlib import contextmanager
 
-def get_stock_info(ticker: str):
+def get_stock_info(ticker: str) -> str:
     """
     Using yahoo finance to get latest stock price of last day
     Args:
@@ -27,11 +26,11 @@ def get_stock_info(ticker: str):
     else:
         return f"{ticker} possibly delisted; no stock price data found"
 
-
-@contextmanager
-def chrome_driver():
+def get_finance_news(ticker: str) -> str:
     """
-    Create chrome driver for scraping
+    Scrape latest news headlines from the yahoo finance news
+    Args:   
+        ticker(str): Company Ticker
     """
     # Set up Selenium WebDriver with headless Chrome
     chrome_options = Options()
@@ -39,39 +38,29 @@ def chrome_driver():
         #Add these 2 if memory issue faced in hosting in streamlit
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    
+
+    chrome_options.add_argument("--ignore-certificate-errors")
+    chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
+    chrome_options.add_argument("--disable-software-rasterizer")  # Prevents GPU fallback
+
     # Set up the WebDriver using webdriver-manager
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver.set_page_load_timeout(30)  # Increase page load timeout
+    driver.implicitly_wait(10)  # Implicitly wait for elements to be available
 
-    try:
-        yield driver
-    finally:
-        driver.quit()  # Ensure that the driver is closed properly
+    # Set up the URL for the news section of the ticker
+    url = f"https://finance.yahoo.com/quote/{ticker}/news/"
+    # Fetch headlines form the html
+    driver.get(url)
+    # Create a News string for vectorstore
+    news_items = driver.find_elements("css selector", "h3.clamp")
+    news = f"Latest News for {ticker}:\n"
+    for item in news_items:
+        title = item.text
+        # Get the next sibling element which is the paragraph
+        detail = item.find_element("xpath", "following-sibling::p").text
+        news += f"{title}: {detail}\n"
+    
+    driver.quit()
 
-
-def get_finance_news(ticker: str):
-    """
-    Scrape latest news headlines from the yahoo finance news
-    Args:   
-        ticker(str): Company Ticker
-    """
-    with chrome_driver() as driver:
-        # Set up the URL for the news section of the ticker
-        url = f"https://finance.yahoo.com/quote/{ticker}/news/"
-
-        # Fetch headlines form the html
-        driver.get(url)
-        news_items = driver.find_elements("css selector", "h3.clamp")
-
-        # Create a News string for vectorstore
-        news = f"Latest News for {ticker}:\n"
-        for item in news_items:
-            title = item.text
-            # Get the next sibling element which is the paragraph
-            detail = item.find_element("xpath", "following-sibling::p").text
-            news += f"{title}: {detail}\n"
-
-        # Close the browser
-        driver.quit()
-
-        return news
+    return news

@@ -1,4 +1,4 @@
-# SEC Filings & Stock Information Chatbot with RAG-based Retrieval
+# SEC Filings Chatbot with RAG-based Retrieval
 
 This project is a financial chatbot designed to help users query SEC filings, stock information, and financial news for a specific company using advanced Retrieval-Augmented Generation (RAG) techniques. It integrates various services like OpenAI, Groq, SEC API, Qdrant, and Yahoo Finance for intelligent data retrieval and processing.
 
