@@ -1,0 +1,26 @@
+# Data Collection
+requests
+#Scraper
+selenium 
+yfinance
+webdriver-manager
+
+
+
+# Vectore DB
+sec_api==1.0.25
+langchain==0.2.16
+langchain-community==0.2.12
+langchain-qdrant==0.1.4
+langchain-openai==0.1.25
+langchain-groq==0.1.9
+fastembed==0.4.1
+# sentence-transformers==3.2.1
+
+
+streamlit
+
+
+
+#python-dotenv
+#ipykernel
