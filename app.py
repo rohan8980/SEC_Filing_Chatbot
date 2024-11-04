@@ -166,13 +166,13 @@ st.title("SEC Filing (10-K) Q&A")
 # Sidebar for API keys and LLM selection
 st.sidebar.title("Configurations")
 llm_provider = st.sidebar.selectbox("Select LLM Company", ["Groq", "OpenAI",])
-openai_api_key = st.sidebar.text_input("OpenAI API Key - Embeddings", type="password")
-sec_api_key = st.sidebar.text_input("SEC Edgar Filings API Key", type="password")
+openai_api_key = st.sidebar.text_input("OpenAI [API Key](https://platform.openai.com/api-keys) - Embeddings", type="password")
+sec_api_key = st.sidebar.text_input("SEC Edgar Filings [API Key](https://sec-api.io/)", type="password")
 # Configure Button to process and initialize everything
 if st.sidebar.button("Configure"):
     # Error if anything is missing
     if not llm_provider:
-        llm_provider = 'Groq'
+        st.sidebar.error("Please select a valid llm provider.")
     elif not openai_api_key:
         st.sidebar.error("Please enter a valid OpenAI API key.")
     elif not sec_api_key:
