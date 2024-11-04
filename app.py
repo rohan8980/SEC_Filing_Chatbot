@@ -202,26 +202,7 @@ if st.sidebar.button("Configure"):
         if 'last_n_chats' not in st.session_state:
             st.session_state.last_n_chats = 10
         if 'items' not in st.session_state:
-            st.session_state.items = {'1': 'Business',
-                    '1A': 'Risk Factors',
-                    '1B': 'Unresolved Staff Comments',
-                    '1C': 'Cybersecurity',
-                    '2': 'Properties',
-                    '3': 'Legal Proceedings',
-                    '4': 'Mine Safety Disclosures',
-                    '5': 'Market for Registrant Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities',
-                    '6': 'Selected Financial Data',
-                    '7': 'Management’s Discussion and Analysis of Financial Condition and Results of Operations',
-                    '7A': 'Quantitative and Qualitative Disclosures about Market Risk',
-                    '8': 'Financial Statements and Supplementary Data',
-                    '9': 'Changes in and Disagreements with Accountants on Accounting and Financial Disclosure',
-                    '9A': 'Controls and Procedures',
-                    '9B': 'Other Information',
-                    '10': 'Directors, Executive Officers and Corporate Governance',
-                    '11': 'Executive Compensation',
-                    '12': 'Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters',
-                    '13': 'Certain Relationships and Related Transactions, and Director Independence',
-                    '14': 'Principal Accountant Fees and Services',}
+            st.session_state.items = edgarapi.get_sections_10K()
 
         st.session_state.is_configured = True
     

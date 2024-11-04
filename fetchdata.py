@@ -24,6 +24,31 @@ def get_companies_cik(headers:dict):
 
     return company_tickers
 
+def get_sections_10K():
+    """
+    Get dictionary of all sections of 10-K
+    """
+    return {'1': 'Business',
+            '1A': 'Risk Factors',
+            '1B': 'Unresolved Staff Comments',
+            '1C': 'Cybersecurity',
+            '2': 'Properties',
+            '3': 'Legal Proceedings',
+            '4': 'Mine Safety Disclosures',
+            '5': 'Market for Registrant Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities',
+            '6': 'Selected Financial Data',
+            '7': 'Management’s Discussion and Analysis of Financial Condition and Results of Operations',
+            '7A': 'Quantitative and Qualitative Disclosures about Market Risk',
+            '8': 'Financial Statements and Supplementary Data',
+            '9': 'Changes in and Disagreements with Accountants on Accounting and Financial Disclosure',
+            '9A': 'Controls and Procedures',
+            '9B': 'Other Information',
+            '10': 'Directors, Executive Officers and Corporate Governance',
+            '11': 'Executive Compensation',
+            '12': 'Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters',
+            '13': 'Certain Relationships and Related Transactions, and Director Independence',
+            '14': 'Principal Accountant Fees and Services',}
+
 def get_recent_filings_10K(cik: str, headers:dict, count: int=2, ):
     """
     Get SEC filings for a company by CIK (Central Index Key) from EDGAR for last 2 filings
