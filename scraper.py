@@ -6,7 +6,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from contextlib import contextmanager
 
-def get_stock_info(ticker):
+def get_stock_info(ticker: str):
+    """
+    Using yahoo finance to get latest stock price of last day
+    Args:
+        ticker(str): Company ticker
+    """
     stock_info = yf.Ticker(ticker).history(period="1d")
     if not stock_info.empty:
         date = stock_info.index[0].strftime('%Y-%m-%d')
@@ -25,6 +30,9 @@ def get_stock_info(ticker):
 
 @contextmanager
 def chrome_driver():
+    """
+    Create chrome driver for scraping
+    """
     # Set up Selenium WebDriver with headless Chrome
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -41,7 +49,12 @@ def chrome_driver():
         driver.quit()  # Ensure that the driver is closed properly
 
 
-def get_finance_news(ticker):
+def get_finance_news(ticker: str):
+    """
+    Scrape latest news headlines from the yahoo finance news
+    Args:   
+        ticker(str): Company Ticker
+    """
     with chrome_driver() as driver:
         # Set up the URL for the news section of the ticker
         url = f"https://finance.yahoo.com/quote/{ticker}/news/"

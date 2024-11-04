@@ -14,6 +14,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from langchain_community.chat_message_histories import ChatMessageHistory
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+
 # Setting up api keys and env variables from secrets
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 QDRANT_URL = st.secrets["QDRANT_URL"]
@@ -158,7 +159,6 @@ if 'is_configured' not in st.session_state:
     st.session_state.is_configured = False
 if 'data_fetched' not in st.session_state:
     st.session_state.data_fetched = False
-    # st.session_state.data_fetched = True
 
 # UI Components
 st.title("SEC Filing (10-K) Q&A")
@@ -168,13 +168,16 @@ st.sidebar.title("Configurations")
 llm_provider = st.sidebar.selectbox("Select LLM Company", ["Groq", "OpenAI",])
 openai_api_key = st.sidebar.text_input("OpenAI API Key - Embeddings", type="password")
 sec_api_key = st.sidebar.text_input("SEC Edgar Filings API Key", type="password")
+# Configure Button to process and initialize everything
 if st.sidebar.button("Configure"):
+    # Error if anything is missing
     if not llm_provider:
         llm_provider = 'Groq'
     elif not openai_api_key:
         st.sidebar.error("Please enter a valid OpenAI API key.")
     elif not sec_api_key:
         st.sidebar.error("Please enter a valid SEC API Key.")
+    # Else initialize session variables
     else:
         # Setting up session variables
         if 'store' not in st.session_state:

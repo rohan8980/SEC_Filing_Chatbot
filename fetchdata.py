@@ -63,12 +63,26 @@ def get_recent_filings_10K(cik: str, headers:dict, count: int=2, ):
         return []
 
 def initialize_vectorestore(session_id: str, qdrant_client: QdrantClient, embeddings: OpenAIEmbeddings):
-    # session_id = st.session_state.session_id if not session_id else session_id
+    """
+    Initialize Qdrant Vectorstore.
+    Create collection with session_id as name collection name
+        Config: Vectorsize = 1536 
+        Config: distance = Cosine
+    """
     qdrant_client.create_collection(collection_name=session_id, vectors_config=VectorParams(size=1536, distance=Distance.COSINE),)
     return QdrantVectorStore(client=qdrant_client, collection_name=session_id, embedding=embeddings,)
-    # return QdrantVectorStore(client=qdrant_client, collection_name=session_id, embedding=embeddings)
 
 def save_to_vectorstore(data: list, vector_store: QdrantVectorStore, type_of_data: str='filings', items:dict=None, extractorApi: ExtractorApi=None):
+    """
+    Saves data (list of text) into Qdrant vectorstore with metadata
+    ExtractorApi fetches data for each section. 
+    Args:
+        data (list[str]): Data to be stored in vectorstore
+        vector_store: Qdrant vector store
+        type_of_data: ['filings', 'stock_info', 'news']
+        items: 10-k filing sections dictionary (type_of_data=='filings)
+        extractorApi: EDGAR API to get filings data (type_of_data=='filings)
+    """
     if type_of_data == 'filings':
         # Iterating for each filing
         for filing in data:

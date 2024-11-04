@@ -8,6 +8,14 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 
 
 def get_llm(provider: str, api_key: str):
+    """
+    Get LLM for provider
+    Args:
+        provider: ['openai', 'groq'] (config: max_tokens=500, temp=0 (openai))
+        api_key: api_key of respective provider
+    Returns:
+        llm
+    """
     if provider.lower() == 'openai':
         model_name = "gpt-3.5-turbo-instruct"
         llm = OpenAI(model=model_name, api_key=api_key, temperature=0, max_tokens=500, max_retries=2)
@@ -17,6 +25,14 @@ def get_llm(provider: str, api_key: str):
     return llm
 
 def get_rag_chain(vectorstore, llm):
+    """
+    Get RAG chain from the vectorstore, llm and chat history
+    The contextually related question is converted to standalone question using llm and history aware retriever
+    The retrieved documents are stuffed together for retrieval
+    Args:
+        vectorstore: Qdrant vector store
+        llm: groq, openai
+    """
     # Create retriever from vectorstore
     retriever = vectorstore.as_retriever() #search_kwargs={"k": 5}
     
