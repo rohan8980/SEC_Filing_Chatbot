@@ -55,7 +55,7 @@ This project is a financial chatbot designed to help users query SEC filings, st
 
 ## Usage
 ### Fetching SEC Filings
-The `fetchdata.py` module allows you to fetch the most recent 10-K filings for a company based on its CIK (Central Index Key). These filings are processed, chunked, and stored in a Qdrant vector store for retrieval during chat.
+The `fetchfilings.py` and `qdrant_vectors_manager.py` module allows you to fetch the most recent 10-K filings for a company based on its CIK (Central Index Key). These filings are processed, chunked, and stored in a Qdrant vector store for retrieval during chat.
 
 ### RAG System
 The `llm.py` module configures a RAG (Retrieval-Augmented Generation) chain using OpenAI or Groq models. It retrieves relevant filings sections from the vector store, formulates standalone questions, and generates answers based on the user's queries.
@@ -76,9 +76,13 @@ Users can interact with the chatbot via the Streamlit interface, and the chat hi
 ### app.py
 The main entry point for the application, responsible for initializing the chatbot interface in Streamlit. It manages user input, session handling, and displays results fetched from the APIs and vector store.
 
-### fetchdata.py
+### fetchfilings.py
 Handles:
+- Providing list of companies and its CIK
 - Fetching SEC filings for a specific company using its CIK.
+- Fetching sections for each filings
+  
+### qdrant_vectors_manager.py
 - Initializing a Qdrant vector store and embedding data.
 - Chunking and saving 10-K filing sections into the vector store using OpenAI embeddings.
 
