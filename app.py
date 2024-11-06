@@ -2,10 +2,11 @@ import os
 import datetime
 import warnings
 import streamlit as st
-import llmrag as llmconfig
-import scraper as webscraper
-import fetchdata as edgarapi
+from llmrag import LlmRag
+from scraper import Scraper
+from fetchfilings import FetchFilings
 from sec_api import ExtractorApi
+from qdrant_vectors_manager import QdrantVectorsManager
 from qdrant_client import QdrantClient
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -22,7 +23,19 @@ QDRANT_API_KEY = st.secrets["QDRANT_API_KEY"]
 NAME = st.secrets["NAME"]
 EMAIL = st.secrets["EMAIL"]
 headers = {"User-Agent": f"{NAME} {EMAIL}",}
+llm_rag = LlmRag()
+fetch_filings = FetchFilings(headers)
+qdrant_vectorstore = QdrantVectorsManager()
+embedding_model_openai = "text-embedding-3-small"
+show_recent_n_chats = 10
+fetch_recent_n_years_filings = 5
 
+
+# Streamlit UI: Session variables for UI
+if 'is_configured' not in st.session_state:
+    st.session_state.is_configured = False
+if 'data_fetched' not in st.session_state:
+    st.session_state.data_fetched = False
 
 # Utility Functions to manage UI
 def get_new_session():
@@ -153,13 +166,6 @@ def clear_input():
     st.session_state.query=st.session_state.text_input
     st.session_state.text_input=""  
 
-
-# Streamlit UI: Session variables for UI
-if 'is_configured' not in st.session_state:
-    st.session_state.is_configured = False
-if 'data_fetched' not in st.session_state:
-    st.session_state.data_fetched = False
-
 # UI Components
 st.title("SEC Filing (10-K) Q&A")
 
@@ -187,23 +193,23 @@ if st.sidebar.button("Configure"):
             get_new_session()
         if 'llm' not in st.session_state:
             api_key = openai_api_key if llm_provider == "OpenAI" else GROQ_API_KEY if llm_provider == 'Groq' else None
-            st.session_state.llm = llmconfig.get_llm(provider=llm_provider, api_key=api_key)
+            st.session_state.llm = llm_rag.get_llm(provider=llm_provider, api_key=api_key)
         if 'extractorApi' not in st.session_state:
             st.session_state.extractorApi = ExtractorApi(sec_api_key)
         if 'qdrant_client' not in st.session_state:
             st.session_state.qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY,)
         if 'embeddings' not in st.session_state:
-            st.session_state.embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=openai_api_key)
+            st.session_state.embeddings = OpenAIEmbeddings(model=embedding_model_openai, openai_api_key=openai_api_key)
         if 'vector_store' not in st.session_state:
-            st.session_state.vector_store = edgarapi.initialize_vectorestore(session_id = st.session_state.session_id, 
+            st.session_state.vector_store = qdrant_vectorstore.initialize_vectorstore(collection_name = st.session_state.session_id, 
                                                                             qdrant_client = st.session_state.qdrant_client,
                                                                             embeddings = st.session_state.embeddings)
         if 'query' not in st.session_state:
             st.session_state.query=""
         if 'last_n_chats' not in st.session_state:
-            st.session_state.last_n_chats = 10
+            st.session_state.last_n_chats = show_recent_n_chats
         if 'sections' not in st.session_state:
-            st.session_state.sections = edgarapi.get_sections_10K()
+            st.session_state.sections = fetch_filings.get_sections_10K()
 
         st.session_state.is_configured = True
     
@@ -211,14 +217,14 @@ if st.sidebar.button("Configure"):
 # Main Screen
 if st.session_state.is_configured:
     # Getting list of companies and cik from EDGAR
-    company_tickers = edgarapi.get_companies_cik(headers=headers)
+    company_tickers = fetch_filings.get_companies_cik()
     selected_company = st.selectbox("Choose a company", [""] +list(company_tickers.keys()))
     if selected_company:
         # Getting Cik from the Selected Company
         cik = company_tickers[selected_company]
         selected_filings = []
         # Fetching 10K filings using cik of the selected company
-        filings = edgarapi.get_recent_filings_10K(cik=cik, headers=headers, count=5) # Limit max to 5 years filings
+        filings = fetch_filings.get_recent_filings_10K(cik=cik, count=fetch_recent_n_years_filings) # Limit max to 5 years filings
 
         # Checkbox for 10k filings based on filing dates
         st.write("###### Select filings")
@@ -252,23 +258,24 @@ if st.session_state.is_configured:
                 if i + j < num_sections:
                     item_key, item_value = sections[i + j]
                     with col:
-                        if st.checkbox(f"{item_key}: {item_value[:50]}", value=True):
+                        if st.checkbox(f"{item_key}: {item_value[:70]}", value=True):
                             selected_sections[item_key] = item_value
 
         # Fetch Data Button to gather data and save it in Qdrant VectorStore
         if st.button("Fetch Data"):
             st.session_state.sections = selected_sections
             with st.spinner('Extracting data from EDGAR API...'):
-                edgarapi.save_to_vectorstore(data=filings, vector_store=st.session_state.vector_store, type_of_data='filings', sections=st.session_state.sections, extractorApi=st.session_state.extractorApi)
+                qdrant_vectorstore.save_to_vectorstore(data=filings, vector_store=st.session_state.vector_store, type_of_data='filings', sections=st.session_state.sections, extractorApi=st.session_state.extractorApi)
                 # st.write("Selected filings have been processed and saved to the vector store.")
             if search_web:
                 ticker = selected_company.split('(')[-1].strip(') ')
+                webscraper = Scraper(ticker)
                 with st.spinner('Gathering stock info from web..'):
-                    stock_info = webscraper.get_stock_info(ticker=ticker)
-                    edgarapi.save_to_vectorstore(data=stock_info, vector_store=st.session_state.vector_store, type_of_data='stock_info')
+                    stock_info = webscraper.get_stock_info()
+                    qdrant_vectorstore.save_to_vectorstore(data=stock_info, vector_store=st.session_state.vector_store, type_of_data='stock_info')
                 with st.spinner('Gathering latest news from web..'):
-                    news_info = webscraper.get_finance_news(ticker=ticker)
-                    edgarapi.save_to_vectorstore(data=news_info, vector_store=st.session_state.vector_store, type_of_data='news')
+                    news_info = webscraper.get_finance_news()
+                    qdrant_vectorstore.save_to_vectorstore(data=news_info, vector_store=st.session_state.vector_store, type_of_data='news')
                 # st.write(f"Web data for {selected_company} has been scraped and saved to the vector store.")
             
             st.session_state.data_fetched = True
@@ -276,7 +283,7 @@ if st.session_state.is_configured:
     # Begin Q&A after vectorstore    
     if st.session_state.data_fetched:
         # Prepare RAG Chain from vectorestore and llm
-        rag_chain = llmconfig.get_rag_chain(st.session_state.vector_store, st.session_state.llm) 
+        rag_chain = llm_rag.get_rag_chain(vectorstore = st.session_state.vector_store, llm = st.session_state.llm) 
 
         # Chat history container
         chat_placeholder = st.empty()
