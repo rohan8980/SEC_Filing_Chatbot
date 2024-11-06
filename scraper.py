@@ -1,13 +1,12 @@
 
 import yfinance as yf
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
+import requests
+from bs4 import BeautifulSoup
 
 class Scraper:
-    def __init__(self, ticker: str):
+    def __init__(self, ticker: str, company_name: str):
         self.ticker = ticker
+        self.company_name = company_name
 
     def get_stock_info(self) -> str:
         """
@@ -28,41 +27,22 @@ class Scraper:
                     f"and closed at ${close_price:.2f}. The trading volume was {volume}.")
         else:
             return f"{self.ticker} possibly delisted; no stock price data found"
-
-    def get_finance_news(self) -> str:
+    
+    def get_finance_news(self) -> str: 
         """
-        Scrape latest news headlines from the yahoo finance news
-        based on ticker(str): Company Ticker
+        Scrape latest news headlines from the google news
+        based on "company_name finance"
         """
-        # Set up Selenium WebDriver with headless Chrome
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-            #Add these 2 if memory issue faced in hosting in streamlit
-        # chrome_options.add_argument("--no-sandbox")
-        # chrome_options.add_argument("--disable-dev-shm-usage")
+        url = f"https://news.google.com/search?q={self.company_name.replace(' ','+')}+finance"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        news_items = soup.find_all('a', class_='JtKRv')
 
-        # chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
-        # chrome_options.add_argument("--disable-software-rasterizer")  # Prevents GPU fallback
-
-        # Set up the WebDriver using webdriver-manager
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager(driver_version="114.0.5735.90").install()), options=chrome_options)
-        driver.set_page_load_timeout(30)  # Increase page load timeout
-        driver.implicitly_wait(10)  # Implicitly wait for elements to be available
-
-        # Set up the URL for the news section of the ticker
-        url = f"https://finance.yahoo.com/quote/{self.ticker}/news/"
-        # Fetch headlines form the html
-        driver.get(url)
-        # Create a News string for vectorstore
-        news_items = driver.find_elements("css selector", "h3.clamp")
-        news = f"Latest News for {self.ticker}:\n"
+        news = f"Latest News for {self.company_name}:\n"
         for item in news_items:
-            title = item.text
-            # Get the next sibling element which is the paragraph
-            detail = item.find_element("xpath", "following-sibling::p").text
-            news += f"{title}: {detail}\n"
-        
-        driver.quit()
-
+            title = item.get_text()
+            href = item.get('href')  # Extract the URL from the 'href' attribute
+            full_url = f"https://news.google.com{href}"  # Construct the full URL
+            news += f"{title}\n"
+            
         return news

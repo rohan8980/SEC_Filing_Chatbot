@@ -269,7 +269,8 @@ if st.session_state.is_configured:
                 # st.write("Selected filings have been processed and saved to the vector store.")
             if search_web:
                 ticker = selected_company.split('(')[-1].strip(') ')
-                webscraper = Scraper(ticker)
+                company_name = selected_company.split('(')[0].strip()
+                webscraper = Scraper(ticker=ticker, company_name=company_name)
                 with st.spinner('Gathering stock info from web..'):
                     stock_info = webscraper.get_stock_info()
                     qdrant_vectorstore.save_to_vectorstore(data=stock_info, vector_store=st.session_state.vector_store, type_of_data='stock_info')
