@@ -1,9 +1,9 @@
 # Data Collection
 requests
 #Scraper
-selenium
+selenium==4.26.1
 yfinance==0.2.48
-webdriver-manager
+webdriver-manager==5.3.2
 
 
 
