@@ -1,1 +1,1 @@
-chromium
+chromium==114.0.5735.90
