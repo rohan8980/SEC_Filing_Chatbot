@@ -46,7 +46,7 @@ class Scraper:
         # chrome_options.add_argument("--disable-software-rasterizer")  # Prevents GPU fallback
 
         # Set up the WebDriver using webdriver-manager
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="114.0.5735.90").install()), options=chrome_options)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager(driver_version="114.0.5735.90").install()), options=chrome_options)
         driver.set_page_load_timeout(30)  # Increase page load timeout
         driver.implicitly_wait(10)  # Implicitly wait for elements to be available
 
