@@ -38,15 +38,15 @@ class Scraper:
         chrome_options = Options()
         chrome_options.add_argument("--headless")
             #Add these 2 if memory issue faced in hosting in streamlit
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
+        # chrome_options.add_argument("--no-sandbox")
+        # chrome_options.add_argument("--disable-dev-shm-usage")
 
-        chrome_options.add_argument("--ignore-certificate-errors")
+        # chrome_options.add_argument("--ignore-certificate-errors")
         chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
-        chrome_options.add_argument("--disable-software-rasterizer")  # Prevents GPU fallback
+        # chrome_options.add_argument("--disable-software-rasterizer")  # Prevents GPU fallback
 
         # Set up the WebDriver using webdriver-manager
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="114.0.5735.90").install()), options=chrome_options)
         driver.set_page_load_timeout(30)  # Increase page load timeout
         driver.implicitly_wait(10)  # Implicitly wait for elements to be available
 
