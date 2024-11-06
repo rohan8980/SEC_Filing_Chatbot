@@ -95,4 +95,4 @@ Responsible for:
 ### scraper.py
 Performs:
 - Stock price data retrieval using the Yahoo Finance API.
-- Scraping the latest financial news headlines for a company using Selenium and Yahoo Finance's website.
+- Scraping the latest financial news headlines for a company using BeautifulSoup and Google News website.
