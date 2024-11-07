@@ -96,3 +96,4 @@ Responsible for:
 Performs:
 - Stock price data retrieval using the Yahoo Finance API.
 - Scraping the latest financial news headlines for a company using BeautifulSoup and Google News website.
+- Scraping the latest 50 news headlines and details for a company from Google Search > News tab
