@@ -2,6 +2,7 @@
 requests
 #Scraper
 yfinance==0.2.48
+tabulate
 bs4
 # selenium==4.26.1
 # webdriver-manager==4.0.2

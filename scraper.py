@@ -10,23 +10,16 @@ class Scraper:
 
     def get_stock_info(self) -> str:
         """
-        Using yahoo finance to get latest stock price of last day
+        Using yahoo finance to get latest stock price of 5 last days
         based on self.ticker(str): Company ticker
         """
-        stock_info = yf.Ticker(self.ticker).history(period="1d")
+        latest_period = "5d" # Valid periods: ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']
+        stock_info = yf.Ticker(self.ticker).history(period=latest_period)
         if not stock_info.empty:
-            date = stock_info.index[0].strftime('%Y-%m-%d')
-            open_price = stock_info['Open'].values[0]
-            high_price = stock_info['High'].values[0]
-            low_price = stock_info['Low'].values[0]
-            close_price = stock_info['Close'].values[0]
-            volume = stock_info['Volume'].values[0]
-            
-            return (f"On {date}, the stock price for {self.ticker} opened at ${open_price:.2f}, "
-                    f"reached a high of ${high_price:.2f}, a low of ${low_price:.2f}, "
-                    f"and closed at ${close_price:.2f}. The trading volume was {volume}.")
+            stock_mrkdwn = stock_info.to_markdown() 
+            return f"The stock price history of {self.company_name} for last 5 days is:\n {stock_mrkdwn}"
         else:
-            return f"{self.ticker} possibly delisted; no stock price data found"
+            return f"{self.company_name} possibly delisted; no stock price data found"
     
     def get_finance_news_gglnews(self) -> str: 
         """

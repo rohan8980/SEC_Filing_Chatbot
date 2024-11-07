@@ -58,7 +58,7 @@ class QdrantVectorsManager:
                     except Exception as e:
                         print(f"Error fetching data for {filing_url} - {item} \n{e}")
         elif type_of_data == 'stock_info':
-            vector_store.add_texts(texts=[data], metadatas=[{"details": "stock"}], ids=[str(uuid4())])
+            vector_store.add_texts(texts=[data], metadatas=[{"details": "stock", "chunk_id": "0"}], ids=[str(uuid4())])
         elif type_of_data == 'news':
             if len(data) > 1500:
                 split_texts = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=150).split_text(data)
