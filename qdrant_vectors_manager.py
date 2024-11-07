@@ -60,4 +60,15 @@ class QdrantVectorsManager:
         elif type_of_data == 'stock_info':
             vector_store.add_texts(texts=[data], metadatas=[{"details": "stock"}], ids=[str(uuid4())])
         elif type_of_data == 'news':
-            vector_store.add_texts(texts=[data], metadatas=[{"details": "news"}], ids=[str(uuid4())])
+            if len(data) > 1500:
+                split_texts = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=150).split_text(data)
+                uuids, metadata_list = [], []
+                for i in range(len(split_texts)):
+                    uuids.append(str(uuid4())) 
+                    metadata_list.append({
+                        "details": "news",
+                        "chunk_id": f"{i}",
+                    })
+                vector_store.add_texts(texts=split_texts, metadatas=metadata_list, ids=uuids)
+            else:
+                vector_store.add_texts(texts=[data], metadatas=[{"details": "news"}], ids=[str(uuid4())])

@@ -28,7 +28,7 @@ class Scraper:
         else:
             return f"{self.ticker} possibly delisted; no stock price data found"
     
-    def get_finance_news(self) -> str: 
+    def get_finance_news_gglnews(self) -> str: 
         """
         Scrape latest news headlines from the google news
         based on "company_name finance"
@@ -46,3 +46,27 @@ class Scraper:
             news += f"{title}\n"
             
         return news
+    
+    def get_finance_news_gglsrch(self) -> str:
+        """
+        Scrape latest news headlines and details from the google search 50 results
+        by searching: ""company_name" finance news" > News tab
+        """
+        top_n_results = 50
+        url = f"https://www.google.com/search?&q=%22{self.company_name.replace(' ','+')}%22+finance+news&tbm=nws&num={top_n_results}"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        news_items = soup.find_all('h3')
+
+        news = f"Latest News for {self.company_name}:\n"
+        for item in news_items:
+            title = item.get_text()
+            parent_detail = item.find_parent('a')
+            # detail = parent_detail.find_next('div').find_next('div').find_next('div').find_next('div').find_next('div').find_next('div').find_next('div')
+            detail = parent_detail.find_next('img').find_next('div') 
+            detail = ' : ' + detail.get_text() if detail else ""
+
+            news += f"{title}: {detail}\n"
+
+        return news
+            

@@ -274,8 +274,11 @@ if st.session_state.is_configured:
                 with st.spinner('Gathering stock info from web..'):
                     stock_info = webscraper.get_stock_info()
                     qdrant_vectorstore.save_to_vectorstore(data=stock_info, vector_store=st.session_state.vector_store, type_of_data='stock_info')
-                with st.spinner('Gathering latest news from web..'):
-                    news_info = webscraper.get_finance_news()
+                with st.spinner('Gathering latest news from news.google.com..'):
+                    news_info = webscraper.get_finance_news_gglnews()
+                    qdrant_vectorstore.save_to_vectorstore(data=news_info, vector_store=st.session_state.vector_store, type_of_data='news')
+                with st.spinner('Gathering latest news from google.com..'):
+                    news_info = webscraper.get_finance_news_gglsrch()
                     qdrant_vectorstore.save_to_vectorstore(data=news_info, vector_store=st.session_state.vector_store, type_of_data='news')
                 # st.write(f"Web data for {selected_company} has been scraped and saved to the vector store.")
             
