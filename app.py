@@ -187,29 +187,30 @@ if st.sidebar.button("Configure"):
     # Else initialize session variables
     else:
         # Setting up session variables
-        if 'store' not in st.session_state:
-            st.session_state.store={}
-        if 'session_id' not in st.session_state:
-            get_new_session()
-        if 'llm' not in st.session_state:
-            api_key = openai_api_key if llm_provider == "OpenAI" else GROQ_API_KEY if llm_provider == 'Groq' else None
-            st.session_state.llm = llm_rag.get_llm(provider=llm_provider, api_key=api_key)
-        if 'extractorApi' not in st.session_state:
-            st.session_state.extractorApi = ExtractorApi(sec_api_key)
-        if 'qdrant_client' not in st.session_state:
-            st.session_state.qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY,)
-        if 'embeddings' not in st.session_state:
-            st.session_state.embeddings = OpenAIEmbeddings(model=embedding_model_openai, openai_api_key=openai_api_key)
-        if 'vector_store' not in st.session_state:
-            st.session_state.vector_store = qdrant_vectorstore.initialize_vectorstore(collection_name = st.session_state.session_id, 
-                                                                            qdrant_client = st.session_state.qdrant_client,
-                                                                            embeddings = st.session_state.embeddings)
-        if 'query' not in st.session_state:
-            st.session_state.query=""
-        if 'last_n_chats' not in st.session_state:
-            st.session_state.last_n_chats = show_recent_n_chats
-        if 'sections' not in st.session_state:
-            st.session_state.sections = fetch_filings.get_sections_10K()
+        with st.spinner('Configuring...'):
+            if 'store' not in st.session_state:
+                st.session_state.store={}
+            if 'session_id' not in st.session_state:
+                get_new_session()
+            if 'llm' not in st.session_state:
+                api_key = openai_api_key if llm_provider == "OpenAI" else GROQ_API_KEY if llm_provider == 'Groq' else None
+                st.session_state.llm = llm_rag.get_llm(provider=llm_provider, api_key=api_key)
+            if 'extractorApi' not in st.session_state:
+                st.session_state.extractorApi = ExtractorApi(sec_api_key)
+            if 'qdrant_client' not in st.session_state:
+                st.session_state.qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY,)
+            if 'embeddings' not in st.session_state:
+                st.session_state.embeddings = OpenAIEmbeddings(model=embedding_model_openai, openai_api_key=openai_api_key)
+            if 'vector_store' not in st.session_state:
+                st.session_state.vector_store = qdrant_vectorstore.initialize_vectorstore(collection_name = st.session_state.session_id, 
+                                                                                qdrant_client = st.session_state.qdrant_client,
+                                                                                embeddings = st.session_state.embeddings)
+            if 'query' not in st.session_state:
+                st.session_state.query=""
+            if 'last_n_chats' not in st.session_state:
+                st.session_state.last_n_chats = show_recent_n_chats
+            if 'sections' not in st.session_state:
+                st.session_state.sections = fetch_filings.get_sections_10K()
 
         st.session_state.is_configured = True
     

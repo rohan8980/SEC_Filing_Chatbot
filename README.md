@@ -58,7 +58,7 @@ This project is a financial chatbot designed to help users query SEC filings, st
 The `fetchfilings.py` and `qdrant_vectors_manager.py` module allows you to fetch the most recent 10-K filings for a company based on its CIK (Central Index Key). These filings are processed, chunked, and stored in a Qdrant vector store for retrieval during chat.
 
 ### RAG System
-The `llm.py` module configures a RAG (Retrieval-Augmented Generation) chain using OpenAI or Groq models. It retrieves relevant filings sections from the vector store, formulates standalone questions, and generates answers based on the user's queries.
+The `llmrag.py` module configures a RAG (Retrieval-Augmented Generation) chain using OpenAI or Groq models. It retrieves relevant filings sections from the vector store, formulates standalone questions, and generates answers based on the user's queries.
 
 ### Stock Prices & News
 The `scraper.py` module fetches the latest stock price data using the Yahoo Finance API and scrapes the latest news articles related to a specific company.
@@ -86,7 +86,7 @@ Handles:
 - Initializing a Qdrant vector store and embedding data.
 - Chunking and saving 10-K filing sections into the vector store using OpenAI embeddings.
 
-### llm.py
+### llmrag.py
 Responsible for:
 - Setting up the language models (OpenAI or Groq).
 - Creating a RAG chain that uses a history-aware retriever to contextualize questions.
